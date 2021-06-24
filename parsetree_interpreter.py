@@ -49,34 +49,25 @@ class Interpreter(OnaVisitor):
 
         return last_result
 
-    def visitStatement(self, statement):
-        if statement.expression() is not None:
-            return statement.expression().accept(self)
+    def visitVariableAssignmentStatement(self, statement):
+        var_name = statement.IDENTIFIER().getText()
+        var_value = statement.expression().accept(self)
+        self.environment.store(var_name, var_value)
+        return var_value
 
-        if statement.variableAssignmentStatement() is not None:
-            var_assignment = statement.variableAssignmentStatement()
-            var_name = var_assignment.IDENTIFIER().getText()
-            var_value = var_assignment.expression().accept(self)
-            self.environment.store(var_name, var_value)
-            return var_value
+    def visitIfStatement(self, statement):
+        guard = statement.expression()
+        then_do = statement.then_do
+        else_do = statement.else_do
 
-        if statement.ifStatement() is not None:
-            if_statement = statement.ifStatement()
-            guard = if_statement.expression()
-            then_do = if_statement.then_do
-            else_do = if_statement.else_do
+        condition_value = guard.accept(self)
 
-            condition_value = guard.accept(self)
+        if condition_value:
+            return then_do.accept(self)
+        elif else_do is not None:
+            return else_do.accept(self)
 
-            if condition_value:
-                return then_do.accept(self)
-            elif else_do is not None:
-                return else_do.accept(self)
-
-            return None
-
-        raise Exception(f'I don\'t know how to interpret `{statement.getText()}`')
-
+        return None
 
     def visitVariableExpression(self, expression):
         var_name = expression.IDENTIFIER().getText()
@@ -85,10 +76,8 @@ class Interpreter(OnaVisitor):
     def visitNumberLiteralExpression(self, expression):
         return self.parse_num(expression.NUMBER())
 
-
     def visitStringLiteralExpression(self, expression):
         return self.parse_string(expression.STRING())
-
 
     def visitBinaryAdditionExpression(self, expression):
         [lhs, rhs] = expression.expression()
@@ -107,9 +96,6 @@ class Interpreter(OnaVisitor):
         lhs_value = lhs.accept(self)
         rhs_value = rhs.accept(self)
         return lhs_value != rhs_value
-
-    def visitFunctionCallExpression(self, expression):
-        return expression.functionCall().accept(self)
 
     def visitFunctionCall(self, call):
         fn_name = call.IDENTIFIER().getText()
