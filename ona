@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+import sys
+from antlr4 import InputStream, FileStream, CommonTokenStream
+from grammar.OnaLexer import OnaLexer
+from grammar.OnaParser import OnaParser
+from parsetree_interpreter import Interpreter, Environment
+
+class StdinStream(InputStream):
+    def __init__(self):
+        super().__init__(sys.stdin.read())
+        self.fileName = 'stdin'
+
+
+def main(argv):
+    if len(argv) != 2:
+        print(f'Usage: {argv[0]} <file>')
+        return
+    if argv[1] == '-':
+        input_stream = StdinStream()
+    else:
+        input_stream = FileStream(argv[1], 'utf8')
+    lexer = OnaLexer(input_stream)
+    tokens = CommonTokenStream(lexer)
+    parser = OnaParser(tokens)
+    tree = parser.statementList()
+    Interpreter(Environment()).run(tree)
+
+if __name__ == '__main__':
+    import sys
+    main(sys.argv)

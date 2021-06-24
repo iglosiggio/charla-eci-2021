@@ -20,7 +20,7 @@ STRING     : ['] (~[^'\\]|[\\].)* ['] ;
 variableAssignmentStatement
   : IDENTIFIER '=' expression ;
 ifStatement
-  : IF expression THEN statementList (ELSE statementList)? END ;
+  : IF expression THEN then_do=statementList (ELSE else_do=statementList)? END ;
 functionCall
   : IDENTIFIER '(' expressionList ')' ;
 
