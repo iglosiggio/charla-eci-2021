@@ -1,0 +1,6 @@
+valor = leer_num()
+if valor >= 30 then
+    escribir('Muy grande!')
+else
+    escribir('Ok!')
+end
