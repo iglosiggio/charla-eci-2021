@@ -1,0 +1,3 @@
+variable = 5
+variable = variable + 5
+escribir(variable)

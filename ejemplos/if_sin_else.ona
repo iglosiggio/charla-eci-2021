@@ -1,0 +1,3 @@
+if leer_num() != 42 then
+    escribir(‘Mal!’)
+end
