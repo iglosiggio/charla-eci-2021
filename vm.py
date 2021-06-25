@@ -2,10 +2,9 @@ from collections import deque
 import operator
 from utils import Environment, parse_num
 
-def run_bytecode(ona_bytecode):
-    i = 0
-    env = Environment.initial()
-    stack = deque()
+def run_bytecode(ona_bytecode, start_ip=0, env=Environment.initial(), initial_stack=()):
+    i = start_ip
+    stack = deque(initial_stack)
 
     def push(v):
         stack.append(v)
@@ -46,16 +45,16 @@ def run_bytecode(ona_bytecode):
         elif is_op('IS_GE'):
             binop(operator.ge)
         elif is_op('CALL'):
-            argslist_len = arg()
+            arglist_len = arg()
             fn = pop()
-            arglist = [pop() for _ in range(argslist_len)]
+            arglist = [pop() for _ in range(arglist_len)]
             arglist.reverse()
             push(fn(*arglist))
         elif is_op('RET'):
-            return pop()
+            return pop() if len(stack) != 0 else None
         i = i + 1
 
-    return pop() if len(stack) != 0 else None
+    assert False
 
 def print_bytecode(ona_bytecode):
 
@@ -84,15 +83,19 @@ def print_bytecode(ona_bytecode):
     last_label = 0
     label_at = {}
     i = 0
+
+    def found_label(offset):
+        nonlocal last_label
+        offset += 1
+        if offset not in label_at:
+            label_at[offset] = Label(last_label)
+            last_label += 1
+
     while i < len(ona_bytecode):
         if is_op('CONST') or is_op('LOAD') or is_op('STORE') or is_op('PRINT'):
-            # Skip argument
-            arg()
+            i += 1
         elif is_op('JMP') or is_op('JMPNT'):
-            dst = arg() + 1
-            if dst not in label_at:
-                label_at[dst] = Label(last_label)
-                last_label += 1
+            found_label(arg())
         i = i + 1
 
     i = 0
