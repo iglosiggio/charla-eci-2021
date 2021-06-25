@@ -72,7 +72,9 @@ def print_bytecode(ona_bytecode):
     def print_instruction(offset, name, *args):
         label_name = label_at.get(offset, '         ')
         argument_list_string = ', '.join(repr(arg) for arg in args)
-        print(f'{label_name}\t{offset:4X}\t{name}({argument_list_string})')
+        if argument_list_string != '':
+            argument_list_string = f'({argument_list_string})'
+        print(f'{label_name}\t{offset:4X}\t{name}{argument_list_string}')
 
     class Label:
         def __init__(self, id):
