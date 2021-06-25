@@ -74,7 +74,6 @@ def print_bytecode(ona_bytecode):
         argument_list_string = ', '.join(repr(arg) for arg in args)
         print(f'{label_name}\t{offset:4X}\t{name}({argument_list_string})')
 
-
     class Label:
         def __init__(self, id):
             self.id = id
@@ -98,28 +97,10 @@ def print_bytecode(ona_bytecode):
 
     i = 0
     while i < len(ona_bytecode):
-        if is_op('CONST'):
-            print_instruction(i, 'CONST', arg())
-        elif is_op('LOAD'):
-            print_instruction(i, 'LOAD', arg())
-        elif is_op('STORE'):
-            print_instruction(i, 'STORE', arg())
-        elif is_op('PRINT'):
-            print_instruction(i, 'PRINT', arg())
-        elif is_op('READ_NUM'):
-            print_instruction(i, 'READ_NUM')
-        elif is_op('JMP'):
-            dst = label_at[arg() + 1]
-            print_instruction(i, 'JMP', dst)
-        elif is_op('JMPNT'):
-            dst = label_at[arg() + 1]
-            print_instruction(i, 'JMPNT', dst)
-        elif is_op('ADD'):
-            print_instruction(i, 'ADD')
-        elif is_op('IS_NE'):
-            print_instruction(i, 'IS_NE')
-        elif is_op('IS_GE'):
-            print_instruction(i, 'IS_GE')
-        elif is_op('RET'):
-            print_instruction(i, 'RET')
+        if is_op('CONST') or is_op('LOAD') or is_op('STORE') or is_op('PRINT'):
+            print_instruction(i, ona_bytecode[i], arg())
+        elif is_op('JMP') or is_op('JMPNT'):
+            print_instruction(i, ona_bytecode[i], label_at[arg() + 1])
+        else:
+            print_instruction(i, ona_bytecode[i])
         i = i + 1
