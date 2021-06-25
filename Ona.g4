@@ -5,11 +5,6 @@ THEN : [Tt][Hh][Ee][Nn] ;
 ELSE : [Ee][Ll][Ss][Ee] ;
 END  : [Ee][Nn][Dd]     ;
 
-// Operators
-PLUS         : '+'  ;
-GREATER_THAN : '>=' ;
-NOT_EQUALS   : '!=' ;
-
 // More generic tokens
 WS    : [ \t] -> skip ;
 ENTER : [\r]?[\n]     ;
@@ -37,13 +32,13 @@ statementList
   : (endStatement* statement endStatement)* statement? endStatement? ;
 
 expression
-  : IDENTIFIER                                       # variableExpression
-  | NUMBER                                           # numberLiteralExpression
-  | STRING                                           # stringLiteralExpression
-  | functionCall                                     # functionCallExpression
-  | expression PLUS expression                       # binaryAdditionExpression
-  | expression GREATER_THAN expression               # greatherThanExpression
-  | expression NOT_EQUALS expression                 # notEqualsExpression
+  : IDENTIFIER                                  # variableReferenceExpression
+  | NUMBER                                      # numberLiteralExpression
+  | STRING                                      # stringLiteralExpression
+  | functionCall                                # functionCallExpression
+  | expression '+' expression                   # binaryAdditionExpression
+  | expression '>=' expression                  # greaterThanOrEqualsExpression
+  | expression '!=' expression                  # notEqualsExpression
   ;
  expressionList
   : expression (',' expression)*

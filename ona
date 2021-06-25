@@ -4,12 +4,19 @@ from antlr4 import InputStream, FileStream, CommonTokenStream
 from grammar.OnaLexer import OnaLexer
 from grammar.OnaParser import OnaParser
 from parsetree_interpreter import Interpreter, Environment
-
+from compiler import BytecodeCompiler
+from vm import run_bytecode
 class StdinStream(InputStream):
     def __init__(self):
         super().__init__(sys.stdin.read())
         self.fileName = 'stdin'
 
+def run_with_interpreter(tree):
+    Interpreter(Environment()).run(tree)
+
+def compile_and_run(tree):
+    bytecode = BytecodeCompiler().compile(tree)
+    run_bytecode(bytecode)
 
 def main(argv):
     if len(argv) != 2:
@@ -23,7 +30,7 @@ def main(argv):
     tokens = CommonTokenStream(lexer)
     parser = OnaParser(tokens)
     tree = parser.statementList()
-    Interpreter(Environment()).run(tree)
+    run_with_interpreter(tree)
 
 if __name__ == '__main__':
     import sys

@@ -1,13 +1,5 @@
-import codecs
 from grammar.OnaVisitor import OnaVisitor
-
-unicode_escape_decoder = codecs.getdecoder('unicode-escape')
-
-def unescape(text):
-    return unicode_escape_decoder(text)[0]
-
-def parse_num(text):
-    return float(text) if '.' in text else int(text)
+from utils import parse_num, parse_string
 
 class Environment:
     def __init__(self, parent=None):
@@ -37,8 +29,8 @@ class Interpreter(OnaVisitor):
         return parse_num(text)
 
     def parse_string(self, string):
-        text = string.getText()[1:-1] # Trim start and end quotes
-        return unescape(text)
+        text = string.getText()
+        return parse_string(text)
 
     def visitStatementList(self, statement_list):
         statements = statement_list.statement()
@@ -69,7 +61,7 @@ class Interpreter(OnaVisitor):
 
         return None
 
-    def visitVariableExpression(self, expression):
+    def visitVariableReferenceExpression(self, expression):
         var_name = expression.IDENTIFIER().getText()
         return self.environment.lookup(var_name)
 
@@ -85,7 +77,7 @@ class Interpreter(OnaVisitor):
         rhs_value = rhs.accept(self)
         return lhs_value + rhs_value
 
-    def visitGreatherThanExpression(self, expression):
+    def visitGreaterThanOrEqualsExpression(self, expression):
         [lhs, rhs] = expression.expression()
         lhs_value = lhs.accept(self)
         rhs_value = rhs.accept(self)
