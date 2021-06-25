@@ -1,11 +1,4 @@
 grammar Ona;
-// Keywords
-IF   : [Ii][Ff]         ;
-THEN : [Tt][Hh][Ee][Nn] ;
-ELSE : [Ee][Ll][Ss][Ee] ;
-END  : [Ee][Nn][Dd]     ;
-
-// More generic tokens
 WS    : [ \t] -> skip ;
 ENTER : [\r]?[\n]     ;
 IDENTIFIER : [A-Za-z_][A-Za-z0-9_]*   ;
@@ -15,7 +8,7 @@ STRING     : ['] (~[^'\\]|[\\].)* ['] ;
 variableAssignmentStatement
   : IDENTIFIER '=' expression ;
 ifStatement
-  : IF expression THEN then_do=statementList (ELSE else_do=statementList)? END ;
+  : 'if' expression 'then' then_do=statementList ('else' else_do=statementList)? 'end' ;
 functionCall
   : IDENTIFIER '(' expressionList ')' ;
 

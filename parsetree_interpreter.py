@@ -91,15 +91,17 @@ class Interpreter(OnaVisitor):
 
     def visitFunctionCall(self, call):
         fn_name = call.IDENTIFIER().getText()
+        args = [
+            expression.accept(self)
+            for expression in call.expressionList().expression()
+        ]
 
         if fn_name == 'escribir':
-            print(*[
-                expression.accept(self)
-                for expression in call.expressionList().expression()
-            ])
+            print(*args)
             return
         elif fn_name == 'leer_num':
+            assert len(args) == 0
             num = input('Ingrese un número: ')
             return parse_num(num)
-
-        raise Exception(f'{fn_name} is not a known function name')
+        else:
+            raise Exception(f'{fn_name} is not a known function name')
