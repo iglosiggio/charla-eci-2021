@@ -1,4 +1,3 @@
-
 import codecs
 
 unicode_escape_decoder = codecs.getdecoder('unicode-escape')

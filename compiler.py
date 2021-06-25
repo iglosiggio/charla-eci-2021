@@ -23,6 +23,8 @@ class BytecodeCompiler(OnaVisitor):
 
     def compile(self, parsetree):
         parsetree.accept(self)
+        self.code.append('CONST')
+        self.code.append(None)
         self.code.append('RET')
         return [v.value if isinstance(v, Relocation) else v for v in self.code]
 
@@ -30,43 +32,39 @@ class BytecodeCompiler(OnaVisitor):
         statements = statement_list.statement()
         for statement in statements:
             statement.accept(self)
-    
+
     def visitVariableAssignmentStatement(self, statement):
         varname = statement.IDENTIFIER().getText()
         statement.expression().accept(self)
-        self.code.append('CONST')
-        self.code.append(varname)
         self.code.append('STORE')
-    
+        self.code.append(varname)
+
     def visitIfStatement(self, statement):
         else_label = self.label()
         end_if_label = self.label()
 
         statement.expression().accept(self)
-        self.code.append('CONST')
-        self.code.append(else_label)
         self.code.append('JMPNT')
+        self.code.append(else_label)
         statement.then_do.accept(self)
-        self.code.append('CONST')
-        self.code.append(end_if_label)
         self.code.append('JMP')
+        self.code.append(end_if_label)
 
         else_label.update()
         if statement.else_do is not None:
             statement.else_do.accept(self)
 
         end_if_label.update()
-    
+
     def visitVariableReferenceExpression(self, expression):
         var_name = expression.IDENTIFIER().getText()
-        self.code.append('CONST')
-        self.code.append(var_name)
         self.code.append('LOAD')
-    
+        self.code.append(var_name)
+
     def visitNumberLiteralExpression(self, expression):
         self.code.append('CONST')
         self.code.append(parse_num(expression.NUMBER().getText()))
-    
+
     def visitStringLiteralExpression(self, expression):
         self.code.append('CONST')
         self.code.append(parse_string(expression.STRING().getText()))
@@ -79,12 +77,11 @@ class BytecodeCompiler(OnaVisitor):
         for argument in arguments:
             argument.accept(self)
 
-        self.code.append('CONST')
-        self.code.append(arity)
-
         if fn_name == 'escribir':
             self.code.append('PRINT')
+            self.code.append(arity)
         elif fn_name == 'leer_num':
+            assert arity == 0
             self.code.append('READ_NUM')
         else:
             raise Exception(f'{fn_name} is not a known function name')
