@@ -1,36 +1,9 @@
 from grammar.OnaVisitor import OnaVisitor
-from utils import parse_num, parse_string
-
-class Environment:
-    def __init__(self, parent=None):
-        self.defs = {}
-        self.parent = parent
-
-    def lookup(self, name):
-        if name in self.defs:
-            return self.defs[name]
-        elif self.parent is not None:
-            return self.parent.lookup(name)
-        else:
-            raise KeyError(f'The variable {name} is not defined here')
-
-    def store(self, name, value):
-        self.defs[name] = value
+from utils import Environment, parse_num, parse_string
 
 class Interpreter(OnaVisitor):
     def __init__(self):
-        self.environment = Environment()
-
-        def escribir(*args):
-            print(*args)
-            return
-        self.environment.store('escribir', escribir)
-
-        def leer_num(*args):
-            assert len(args) == 0
-            num = input('Ingrese un número: ')
-            return parse_num(num)
-        self.environment.store('leer_num', leer_num)
+        self.environment = Environment.initial()
 
     def run(self, code):
         return code.accept(self)

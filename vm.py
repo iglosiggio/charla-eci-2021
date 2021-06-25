@@ -1,10 +1,10 @@
 from collections import deque
 import operator
-from utils import parse_num
+from utils import Environment, parse_num
 
 def run_bytecode(ona_bytecode):
     i = 0
-    env = {}
+    env = Environment.initial()
     stack = deque()
 
     def push(v):
@@ -30,17 +30,9 @@ def run_bytecode(ona_bytecode):
         if is_op('CONST'):
             push(arg())
         elif is_op('LOAD'):
-            push(env[arg()])
+            push(env.lookup(arg()))
         elif is_op('STORE'):
-            env[arg()] = pop()
-        elif is_op('PRINT'):
-            arglist_len = arg()
-            arguments = [pop() for _ in range(arglist_len)]
-            arguments.reverse()
-            print(*arguments)
-        elif is_op('READ_NUM'):
-            num = input('Ingrese un número: ')
-            push(parse_num(num))
+            env.store(arg(), pop())
         elif is_op('JMP'):
             i = arg()
         elif is_op('JMPNT'):
@@ -53,6 +45,12 @@ def run_bytecode(ona_bytecode):
             binop(operator.ne)
         elif is_op('IS_GE'):
             binop(operator.ge)
+        elif is_op('CALL'):
+            argslist_len = arg()
+            fn = pop()
+            arglist = [pop() for _ in range(argslist_len)]
+            arglist.reverse()
+            push(fn(*arglist))
         elif is_op('RET'):
             return pop()
         i = i + 1
@@ -99,7 +97,7 @@ def print_bytecode(ona_bytecode):
 
     i = 0
     while i < len(ona_bytecode):
-        if is_op('CONST') or is_op('LOAD') or is_op('STORE') or is_op('PRINT'):
+        if is_op('CONST') or is_op('LOAD') or is_op('STORE') or is_op('CALL'):
             print_instruction(i, ona_bytecode[i], arg())
         elif is_op('JMP') or is_op('JMPNT'):
             print_instruction(i, ona_bytecode[i], label_at[arg() + 1])

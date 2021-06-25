@@ -77,14 +77,10 @@ class BytecodeCompiler(OnaVisitor):
         for argument in arguments:
             argument.accept(self)
 
-        if fn_name == 'escribir':
-            self.code.append('PRINT')
-            self.code.append(arity)
-        elif fn_name == 'leer_num':
-            assert arity == 0
-            self.code.append('READ_NUM')
-        else:
-            raise Exception(f'{fn_name} is not a known function name')
+        self.code.append('LOAD')
+        self.code.append(fn_name)
+        self.code.append('CALL')
+        self.code.append(arity)
 
     def visitBinaryAdditionExpression(self, expression):
         [lhs, rhs] = expression.expression()
