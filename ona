@@ -13,7 +13,7 @@ class StdinStream(InputStream):
 
 def run_with_interpreter(tree):
     print('=== OUTPUT ===')
-    Interpreter(Environment()).run(tree)
+    Interpreter().run(tree)
 
 def compile_and_run(tree):
     bytecode = BytecodeCompiler().compile(tree)

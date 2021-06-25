@@ -18,8 +18,19 @@ class Environment:
         self.defs[name] = value
 
 class Interpreter(OnaVisitor):
-    def __init__(self, environment):
-        self.environment = environment
+    def __init__(self):
+        self.environment = Environment()
+
+        def escribir(*args):
+            print(*args)
+            return
+        self.environment.store('escribir', escribir)
+
+        def leer_num(*args):
+            assert len(args) == 0
+            num = input('Ingrese un número: ')
+            return parse_num(num)
+        self.environment.store('leer_num', leer_num)
 
     def run(self, code):
         return code.accept(self)
@@ -95,13 +106,5 @@ class Interpreter(OnaVisitor):
             expression.accept(self)
             for expression in call.expressionList().expression()
         ]
-
-        if fn_name == 'escribir':
-            print(*args)
-            return
-        elif fn_name == 'leer_num':
-            assert len(args) == 0
-            num = input('Ingrese un número: ')
-            return parse_num(num)
-        else:
-            raise Exception(f'{fn_name} is not a known function name')
+        fn = self.environment.lookup(fn_name)
+        return fn(*args)

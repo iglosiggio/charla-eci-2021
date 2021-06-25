@@ -22,7 +22,7 @@ statement
   | expression
   ;
 statementList
-  : (endStatement* statement endStatement)* statement? endStatement? ;
+  : (endStatement* statement)* endStatement*;
 
 expression
   : IDENTIFIER                                  # variableReferenceExpression
