@@ -22,6 +22,8 @@ class Interpreter(OnaVisitor):
 
         for statement in statements:
             last_result = statement.accept(self)
+            if statement.returnStatement() is not None:
+                return last_result
 
         return last_result
 
@@ -44,6 +46,23 @@ class Interpreter(OnaVisitor):
             return else_do.accept(self)
 
         return None
+
+    def visitFunctionDefinitionStatement(self, statement):
+        fn_name = statement.IDENTIFIER().getText()
+        argument_names = [arg.getText() for arg in statement.argumentList().IDENTIFIER()]
+        fn_body = statement.statementList()
+
+        creation_end = self.environment
+        def wrapper(*args):
+            callee_env = self.environment
+            self.environment = Environment(creation_end)
+            for i, arg in enumerate(argument_names):
+                self.environment.store(arg, args[i])
+            result = fn_body.accept(self)
+            self.environment = callee_env
+            return result
+
+        self.environment.store(fn_name, wrapper)
 
     def visitVariableReferenceExpression(self, expression):
         var_name = expression.IDENTIFIER().getText()

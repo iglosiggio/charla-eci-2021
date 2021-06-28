@@ -1,0 +1,15 @@
+function repetir(veces, cuerpo) do
+
+  function ciclo(contador) do
+    if contador != veces then
+      cuerpo(contador)
+      return ciclo(contador + 1)
+    else
+      return cuerpo(contador)
+    end
+  end
+
+  return ciclo(1)
+end
+
+repetir(10, escribir)

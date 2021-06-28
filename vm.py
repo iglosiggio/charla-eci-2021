@@ -2,6 +2,14 @@ from collections import deque
 import operator
 from utils import Environment, parse_num
 
+class BytecodedFunction:
+    def __init__(self, bytecode, start, creation_env):
+        self.bytecode = bytecode
+        self.start = start + 1
+        self.creation_env = creation_env
+    def __call__(self, *args):
+        return run_bytecode(self.bytecode, self.start, Environment(self.creation_env), args)
+
 def run_bytecode(ona_bytecode, start_ip=0, env=Environment.initial(), initial_stack=()):
     i = start_ip
     stack = deque(initial_stack)
@@ -50,6 +58,11 @@ def run_bytecode(ona_bytecode, start_ip=0, env=Environment.initial(), initial_st
             arglist = [pop() for _ in range(arglist_len)]
             arglist.reverse()
             push(fn(*arglist))
+        elif is_op('CREATE_FUNC'):
+            fn_name = arg()
+            fn_dst = arg()
+            wrapper = BytecodedFunction(ona_bytecode, fn_dst, env)
+            env.store(fn_name, wrapper)
         elif is_op('RET'):
             return pop() if len(stack) != 0 else None
         i = i + 1
@@ -91,19 +104,37 @@ def print_bytecode(ona_bytecode):
             label_at[offset] = Label(last_label)
             last_label += 1
 
+    normal = lambda x: x
+    label = lambda x: label_at[x + 1]
+
+    instruction_info = {
+        'CREATE_FUNC': [normal, label],
+        'CONST': [normal],
+        'LOAD':  [normal],
+        'STORE': [normal],
+        'CALL':  [normal],
+        'JMP':   [label],
+        'JMPNT': [label],
+        'ADD':   [],
+        'IS_NE': [],
+        'IS_GE': [],
+        'RET': [],
+    }
+
     while i < len(ona_bytecode):
-        if is_op('CONST') or is_op('LOAD') or is_op('STORE') or is_op('PRINT'):
-            i += 1
-        elif is_op('JMP') or is_op('JMPNT'):
-            found_label(arg())
+        op_name = ona_bytecode[i]
+        op_argtypes = instruction_info[op_name]
+        for arg_type in op_argtypes:
+            arg_value = arg()
+            if arg_type == label:
+                found_label(arg_value)
         i = i + 1
 
     i = 0
     while i < len(ona_bytecode):
-        if is_op('CONST') or is_op('LOAD') or is_op('STORE') or is_op('CALL'):
-            print_instruction(i, ona_bytecode[i], arg())
-        elif is_op('JMP') or is_op('JMPNT'):
-            print_instruction(i, ona_bytecode[i], label_at[arg() + 1])
-        else:
-            print_instruction(i, ona_bytecode[i])
+        op_offset = i
+        op_name = ona_bytecode[i]
+        op_argtypes = instruction_info[op_name]
+        op_args = [argtype(arg()) for argtype in op_argtypes]
+        print_instruction(op_offset, op_name, *op_args)
         i = i + 1

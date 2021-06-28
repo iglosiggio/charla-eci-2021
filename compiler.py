@@ -17,6 +17,7 @@ class Relocation:
 class BytecodeCompiler(OnaVisitor):
     def __init__(self):
         self.code = []
+        self.remaining = []
 
     def label(self):
         return Relocation(self.code)
@@ -26,12 +27,37 @@ class BytecodeCompiler(OnaVisitor):
         self.code.append('CONST')
         self.code.append(None)
         self.code.append('RET')
+
+        while self.remaining:
+            fn, label = self.remaining.pop(0)
+            label.update()
+            arg_names = [arg.getText() for arg in fn.argumentList().IDENTIFIER()]
+            for arg in reversed(arg_names):
+                self.code.append('STORE')
+                self.code.append(arg)
+            fn.statementList().accept(self)
+            self.code.append('CONST')
+            self.code.append(None)
+            self.code.append('RET')
+
         return [v.value if isinstance(v, Relocation) else v for v in self.code]
 
     def visitStatementList(self, statement_list):
         statements = statement_list.statement()
         for statement in statements:
             statement.accept(self)
+
+    def visitReturnStatement(self, statement):
+        statement.expression().accept(self)
+        self.code.append('RET')
+
+    def visitFunctionDefinitionStatement(self, statement):
+        fn_name = statement.IDENTIFIER().getText()
+        fn_label = self.label()
+        self.code.append('CREATE_FUNC')
+        self.code.append(fn_name)
+        self.code.append(fn_label)
+        self.remaining.append((statement, fn_label))
 
     def visitVariableAssignmentStatement(self, statement):
         varname = statement.IDENTIFIER().getText()

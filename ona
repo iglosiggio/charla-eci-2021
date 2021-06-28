@@ -34,8 +34,8 @@ def main(argv):
     tokens = CommonTokenStream(lexer)
     parser = OnaParser(tokens)
     tree = parser.statementList()
-    #compile_and_run(tree)
-    run_with_interpreter(tree)
+    compile_and_run(tree)
+    #run_with_interpreter(tree)
 
 if __name__ == '__main__':
     import sys

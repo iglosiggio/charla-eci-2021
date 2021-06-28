@@ -1,0 +1,6 @@
+function doble_de(x) do
+  escribir('El doble de', x, 'es', x + x)
+  return x + x
+end
+
+escribir('doble_de(10) + 5 = ', doble_de(10) + 5)

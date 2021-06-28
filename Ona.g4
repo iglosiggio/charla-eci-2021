@@ -18,6 +18,8 @@ endStatement
   ;
 statement
   : variableAssignmentStatement
+  | returnStatement
+  | functionDefinitionStatement
   | ifStatement
   | expression
   ;
@@ -36,4 +38,16 @@ expression
  expressionList
   : expression (',' expression)*
   |
+  ;
+
+functionDefinitionStatement
+  : 'function' IDENTIFIER '(' argumentList ')' 'do' statementList 'end'
+  ;
+argumentList
+  : IDENTIFIER (',' IDENTIFIER)*
+  |
+  ;
+
+returnStatement
+  : 'return' expression
   ;
